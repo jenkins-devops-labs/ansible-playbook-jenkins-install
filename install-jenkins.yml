@@ -1,0 +1,36 @@
+- name: Install jenkins
+  hosts: elliot04
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Installing Java JDK-11
+      ansible.builtin.apt:
+        name: openjdk-11-jre
+        state: present
+        update_cache: yes
+        force_apt_get: true
+
+    - name: Add an Apt signing key, uses whichever key is at the URL
+      ansible.builtin.apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+
+    - name: Add specified repository into sources list
+      ansible.builtin.apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+
+    - name: Installing Jenkins
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+        update_cache: yes
+
+    - name: Getting the Jenkins administration key
+      command:
+        cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: test
+
+    - name: Show the key Jenkins adm
+      ansible.builtin.debug:
+        msg: "{{ test.stdout }}"
